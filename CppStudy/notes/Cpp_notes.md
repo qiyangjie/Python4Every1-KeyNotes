@@ -257,3 +257,133 @@ func(10,,8)// not work
 ```
 
 The default parameters are useful when you need to add new parameters to an old function, in this method, you don't need to modify everywhere you call this function.
+
+## 4. Constructor -- Member function
+- Function name same as the class name
+- Can have parameters, but can not have return value
+- Initialize the object (member variables)
+- If not defined, automatic generate a constructor withour any parameters
+- Auto called when generate an object, cannot executed after the object generated
+- Multiple constructor is allowed for one class
+
+```cpp
+class Complex
+{
+    private:
+        double real,imag;
+    public:
+        Complex(double r, double i =0);
+
+};
+
+Complex::Complex(double r, double i)
+{
+    real =r;
+    imag =i;
+}
+
+Complex c1; // error
+Complex *pc = new Complex;// error
+Complex c1(2);//c1(2,0)
+Complex c1(2,4),C2(3,5)
+Complex *pc = new Complex(3,4);
+```
+
+- Multiple constructor situation
+
+```cpp
+class Complex
+{
+    private:
+        double real,imag;
+    public:
+        void Set(double r, double i);
+        Complex(double r, double i);
+        Complex(double r);
+        Complex(Complex c1, Complex c2);
+};
+
+Complex::Complex(double r, double i)
+{
+    real =r;
+    imag =i;
+}
+
+Complex::Complex(double r)
+{
+    real =r;
+    imag = 0;
+}
+
+Complex::Complex(Complex c1, Complex c2);
+{
+    real = c1.real+c2.real;
+    imag = c1.imag+c2.imag;
+}
+
+Complex c1(3),c2(1,0), C3(c1,c2);
+```
+
+- Constuctor would __public__
+- Private constructor cannot be used to intialize object directly
+- Constructor in data array
+
+```cpp
+class CSample
+{
+        int x;
+    public:
+        CSample()
+        {
+            cout<<"Constructor 1 Called"<<endl;
+        }
+        CSample(int n)
+        {
+            x=n;
+            cout<<"Constructor 2 Called"<<endl;
+        }
+};
+
+int main()
+{
+    CSample array1[2];
+    cout<<"step1"<<endl;
+    CSample array2[2]={4,5};
+    cout<<"step2"<<endl;
+    CSample array3[2]={3};
+    cout<<"step3"<<endl;
+    CSample *array4= new CSample[2];
+    delete []array4;
+    return 0
+}
+```
+The output is as following
+- Constructor 1 Called
+- Constructor 1 Called
+- step1
+- Constructor 2 Called
+- Constructor 2 Called
+- step2
+- Constructor 2 Called
+- Constructor 1 Called
+- step3
+- Constructor 1 Called
+- Constructor 1 Called
+
+Another example for using data array
+
+```cpp
+class Test
+{
+    public:
+        Test(int n) {}//(1)
+        Test(int n, int m){}//(2)
+        Test(){}//(3)
+}
+
+Test array1[3]={1,Test(1,2)};//(1),(2),(3)
+Test array2[3]={Test(2,3),Test(1,2),1}//(2),(2),(1)
+Test *pArray[3]={new Test(4),new Test(1,2)};
+//(1),(2), the third object will not generate as pArray[2] is a point
+```
+

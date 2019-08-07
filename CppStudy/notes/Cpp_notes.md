@@ -387,3 +387,250 @@ Test *pArray[3]={new Test(4),new Test(1,2)};
 //(1),(2), the third object will not generate as pArray[2] is a point
 ```
 
+## 5. Copy Constructor
+
+- Only one parameter: object for same class
+- `X::X( X& )` or `X::X(const X &)`, the latter one can use const object as parameter
+
+```cpp
+class Complex
+{
+    public:
+        double real,imag;
+    Complex(){}
+    Complex(const Complex & c)
+    {
+        real = c.real;
+        image = c.imag;
+        cout << "copy constructor called";
+    }
+};
+Complex c1;
+Complex c2(c1)
+```
+
+- If copy constructor function not defined, the complier can generate default copy constructor.
+
+```cpp
+class Complex
+{
+    private:
+        double real,imag;
+};
+Complex c1;
+Complex c2(c1); // create c2 and initialize as c1
+```
+
+- Not allowed constructor like `X::X(X)`
+
+```cpp
+class CSample
+{
+    CSample(CSample c){} // Error
+}
+```
+
+The situation copy constructor take advantage
+1. Use one object to initialize another object in same class
+
+```cpp
+Complex c2(c1);
+
+Complex c2 = c1; // Notice here is initialize statement
+```
+
+2. If there is a function's parameter is object of class A, so when the function is callled, the copy constructor of class A will be called.
+
+```cpp
+class A
+{
+    public:
+        A(){};
+        A(A & a)
+        {
+            cout<< "Copy constructor called"<<endl;
+        }// THis will be called
+};
+
+void Func(A a1){}
+
+int main()
+{
+    A a2;
+    Func(a2);
+    return 0;
+}
+```
+The output is "Copy constructor called".
+
+3. If the return value of a function is object of class A, the copy constructor is called when function return.
+
+```cpp
+class A
+{
+    public:
+        int v;
+        A(int n)
+        {
+            v = n;
+        }
+        A(const A & a)
+        {
+            v = a.v;
+            cout << "Copy constructor called"<<endl;
+        }
+};
+
+A Func()
+{
+    A b(4);
+    return b;
+}
+
+int main()
+{
+    cout << Func().v<<endl;
+    return 0;
+}
+```
+The output:
+_Copy constructor called_
+_4_
+
+## 6. Type conveter function
+- Realize type convert
+- Only one parameter
+- Not copy constructor
+- Complier call type convert constructor and build a temp object/variable
+
+```cpp
+class Complex
+{
+    public:
+        double real, imag;
+        Complex(int i)
+        {
+            cout<<"IntConstructor called"<<endl;
+            real = i;
+            imag = 0;
+        }
+        Complex(double r, double i)
+        {
+            real = r;
+            imag = i;
+        }
+};
+
+int main()
+{
+    Complex c1(7,8);
+    Complex c2 = 12 ;
+    c1 = 9; // 9 is automatic convert as a temp object of complex
+    cout << c1.real << "," << c1.imag << endl;
+    return 0;
+}
+```
+
+The output:
+_IntConstructor called_
+_IntCOnstructor called_
+_9,0_
+
+## 7. Destructor -- member function
+
+### 7.1 Basic format
+
+- Function name same as class name
+- Begin with ~
+- No parameter and return value
+- One destructor one class
+- Called when delete object
+
+```cpp
+class String
+{
+    private:
+        char *p;
+    public:
+        String()
+        {
+            p = new char[10];
+        }
+
+        ~ String();
+};
+
+String::~String()
+{
+    delete []p;
+}
+```
+
+### 7.2 Destructor and delete
+
+- `delete` lead to call destructor
+
+```cpp
+Ctest *p Test
+pTest = new Ctest;  // call constructor
+delete pTest;       // call destructor
+
+pTest1 = new Ctest[3]; // call constructor 3 times
+delete [] pTest;      // call destructor 3 times
+```
+
+### 7.3 Exampel for desturctor
+
+```cpp
+class Demo
+{
+    int id;
+    public:
+        Demo(int i)
+        {
+            id = i;
+            cout << "id="<<id<<"Constructed"<<endl;
+        }
+        ~Demo()
+        {
+            cout<< "id ="<< id <<"Destructed"<<endl;
+        }
+};
+
+Demo d1(1);
+
+void Func()
+{
+    static Demo d2(2);
+    Demo d3(3);
+    cout << "Func" >> endl;
+}
+
+int main()
+{
+    Demo d4(4);
+    d4 = 6;
+    cout << "main" << endl;
+    { Demo d5(5);}
+    Func();
+    cout << "main ends"<< endl;
+    return 0;
+}
+```
+
+The output:
+_id = 1 Constructed_
+_id = 4 Constructed_
+_id = 6 Constructed_
+_id = 6 Destructed_
+_main_
+_id = 5 Constructed_
+_id = 5 Destructed_
+_id = 2 Constructed_
+_id = 3 Constructed_
+_Func_
+_id = 3 Destructed_
+_main ends_
+_id = 6 Destructed_
+_id = 2 Destructed_
+_id = 1 Destructed_

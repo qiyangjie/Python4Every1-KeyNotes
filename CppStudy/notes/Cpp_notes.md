@@ -634,3 +634,13 @@ _main ends_
 _id = 6 Destructed_
 _id = 2 Destructed_
 _id = 1 Destructed_
+
+## 8. Static member variables and functions
+
+## 9. Enclosing
+
+## 10. Friend
+
+## 11. This pointer
+
+## 12. Constent object, Member variables, and refrerence

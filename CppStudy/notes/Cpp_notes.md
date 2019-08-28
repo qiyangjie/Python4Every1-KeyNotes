@@ -637,9 +637,204 @@ _id = 1 Destructed_
 
 ## 8. Static member variables and functions
 
+- 普通成员变量每个对象有一份，静态成员变量一共只有一份，所有对象共享
+
+```cpp
+# sizeof operation do not compute static memmber
+class CMycalss
+{
+    int n;
+    static int s;
+}
+# sizeof(CMyclass) equal to 4
+```
+
+- 普通成员函数必须具体作用于某个对象，静态成员函数并不具体作用于某个对象
+- 静态成员不需要通过对象就能访问
+
+```cpp
+class CRectangle
+{
+    private:
+        int w,h;
+        static int nTotalArea;
+        static int nTotalNumber;
+    public:
+        CRectangle(int w_, int h_);
+        ~CRectangle();
+        static void PrintTotal();
+};
+
+# Method 1
+CRectangle::PrintTotal();
+
+# Method 2
+CRectangle r;
+r.PrintTotal();
+
+# Method 3
+CRectangle *p = &r;
+p-> PrintTotal()
+
+# Method 4
+CRectangle & ref = r;
+int n = ref.nTotalNumber;
+```
+
+- Example
+
+```cpp
+CRectangle::CRectangle(int w_,int h_)
+{
+    w = w_;
+    h = h_;
+    nTotal Area += w*h;
+}
+
+CRectangle::~CRectangle()
+{
+    nTotalNumber --;
+    nTotalArea -= w*h;
+}
+
+void CRectangle::PrintTotal()
+{
+    cout<<nTotalNumber<<","<<nTotalArea<<endl;
+}
+
+# Must define static variable, otherwise cause link error
+int CRectangle::nTotalNumber =0;
+int CRectangle::nTotalArea = 0;
+
+int main()
+{
+    CRectangle r1(3,3),r2(2,2);
+    CRectangle::PrintTotal();
+    r1.PrintTotal();
+    return 0;
+}
+```
+
+- 在静态成员函数中，不能访问非静态成员变量，也不能调用非静态成员函数。
+
+- 上面的类没有考虑到调用复制构造函数的情况，需要特别注意。
+
+```cpp
+CRectangle::CRectangle(CRectangle &r)
+{
+    w=r.w;
+    h=r.h;
+    nTotalNumber++;
+    nTotalArea +=w*h;
+}
+```
+
 ## 9. Enclosing
 
+- 成员对象：一个类的成员变量是另一个类的对象
+- 包含成员对象的类叫封闭类
+
+```cpp
+class CTyre
+{
+    private:
+        int radius;
+        int width;
+    public:
+        CTyre(int r, int w):radius(r), width(w){}
+};
+
+class CEngine{}
+
+class CCar
+{
+    private:
+        int price;
+        CTyre tyre;
+        CEngine engine;
+    public:
+        CCar(int p, int tr, int tw);
+};
+
+CCar::CCar(int p, int tr, int w):price(p), tyre(tr,w){};
+
+int main()
+{
+    CCar car(20000,17,225);
+    return 0;
+}
+
+```
+
 ## 10. Friend
+
+- 一个类的友元可以访问该类的私有成员
+
+```cpp
+class CCar;
+
+class CDriver
+{
+    public:
+        void ModifyCar(CCar *pCar);
+};
+
+class CCar
+{
+    private:
+        int price;
+    friend int MostExpensiveCar(CCar cars[], int total);
+    friend void CDriver::ModifyCar(CCar *pCar);
+}
+
+void CDriver::ModifyCar(CCar *pCar)
+{
+    pCar->price += 1000;
+}
+int MostExpensiveCar(CCar cars[], int total)
+{
+    int tmpMax = -1;
+    for(int i=0; i < total;++i)
+        if(car[i].price > tmpMax)
+            tmpMax = cars[i].price;
+    return tmpMax;
+}
+
+int main()
+{
+    return 0;
+}
+```
+
+- 将一个类的成员函数作为另一个类的友元
+
+- A是B的友元类，那么A的成员函数可以访问B的私有成员
+
+```cpp
+class CCar
+{
+    private:
+        int price;
+    friend class CDriver;
+}
+
+class CDriver
+{
+    public:
+        CCar myCar;
+        void ModifyCar()
+        {
+            myCar.price += 1000;
+        }
+}
+
+int main()
+{
+    return 0;
+}
+```
+
+- Notice: 友元之间的关系不能传递，不能继承
 
 ## 11. This pointer
 

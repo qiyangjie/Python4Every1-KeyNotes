@@ -1,4 +1,4 @@
-# Cpp Language Learning Notes
+# Cpp language part 1
 
 ## 01. Class Basic
 
@@ -259,6 +259,7 @@ func(10,,8)// not work
 The default parameters are useful when you need to add new parameters to an old function, in this method, you don't need to modify everywhere you call this function.
 
 ## 4. Constructor -- Member function
+
 - Function name same as the class name
 - Can have parameters, but can not have return value
 - Initialize the object (member variables)
@@ -357,7 +358,9 @@ int main()
     return 0
 }
 ```
+
 The output is as following
+
 - Constructor 1 Called
 - Constructor 1 Called
 - step1
@@ -431,6 +434,7 @@ class CSample
 ```
 
 The situation copy constructor take advantage
+
 1. Use one object to initialize another object in same class
 
 ```cpp
@@ -461,6 +465,7 @@ int main()
     return 0;
 }
 ```
+
 The output is "Copy constructor called".
 
 3. If the return value of a function is object of class A, the copy constructor is called when function return.
@@ -498,6 +503,7 @@ _Copy constructor called_
 _4_
 
 ## 6. Type conveter function
+
 - Realize type convert
 - Only one parameter
 - Not copy constructor
@@ -838,4 +844,144 @@ int main()
 
 ## 11. This pointer
 
+- C++ and C translate
+
+```cpp
+class CCar
+{
+    public:
+        int price;
+        void SetPrice(int p);
+};
+
+void CCar::SetPrice(int p)
+{
+    price = p;
+}
+
+int main()
+{
+    CCar car;
+    car.SetPrice(20000);
+    return 0;
+}
+```
+
+```c
+struct CCar
+{
+    int price;
+};
+
+void SetPrice(struct CCar *this, int p)
+{
+    this->price = p;
+}
+
+int main()
+{
+    struct CCar car;
+    SetPrice(& car, 20000);
+    return 0;
+}
+```
+
+- this 指针的作用就是指向成员函数所作用的对象
+
+- 非静态成员函数中可以直接使用this来代表指向该函数作用的对象的指针
+
+```cpp
+class Complex
+{
+    public:
+        double real, imag;
+        void Print()
+        {
+            cout<<real<<","<<imag;
+        }
+        Complex(double r, double i):real(r),imag(i){}
+        Complex AddOne()
+        {
+            this->real++;// equal to real++
+            this->Print();//equal to Print
+            return *this;
+        }
+};
+
+int main()
+{
+    Complex c1(1,1),c2(0,0);
+    c2 = c1.AddOne();
+    return 0;
+}
+```
+
+- 静态成员函数中不能使用this指针
+
 ## 12. Constent object, Member variables, and refrerence
+
+- 如果不希望某个对象的值被改变，则定义该对象的时候可以在前面加const
+
+```cpp
+class Demo
+{
+    private:
+        int value;
+    public:
+        void SetValue(){}
+};
+const Demo Obj;
+```
+
+- 在类的成员函数说明后面可以加const，则该成员函数成为常量成员函数。
+- 常量成员函数执行期间
+-- 不应该修改其所作用的对象
+-- 不应该修改成员变量的值（静态成员变量除外）
+-- 不能调用同类的非常量成员函数（静态成员函数除外）
+
+```cpp
+class Sample
+{
+    public:
+        int value;
+        void GetValue() const;
+        void func(){};
+        Sample(){};
+};
+
+void Sample:GetValue() const
+{
+    value = 0; //wrong, 常量成员函数执行期间不应该修改成员变量的值
+    func();//wrong, 常量成员函数执行期间不能调用同类的非常量成员函数
+}
+
+int main()
+{
+    const Sample o;
+    o.value = 100 //wrong, 常量对象不可被修改
+    o.func(); // wrong, 常量对象上面不能执行非常量成员函数
+    o.GetValue();// OK
+    return 0;
+}
+```
+
+- 两个成员函数，名字和参数表都一样，但是一个const，一个不是，算重载。
+
+- 引用前面可以加const关键字，成为常引用。不能通过常引用，修改其引用的变量。
+
+```cpp
+const int &r = n;
+r = 5; // wrong
+n = 4; //OK
+```
+
+- 对象作为函数的参数时，生成该参数需要调用复制构 造函数，效率比较低。用指针作参数，代码又不好看， 如何解决？
+-- 用对象的常引用作为参数
+
+```cpp
+class Sample{};
+
+void PrintfObj( const Sample & o){}
+```
+
+这样函数中就能确保不会出现无意中更改o的值了。

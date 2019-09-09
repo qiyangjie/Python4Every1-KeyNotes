@@ -331,16 +331,189 @@ void CArray::push_back(int v)
 
 ## 5. OStream operator reload
 
+- ```cout``` define in ```iostream```, is an object of class ```ostream```.
+
+- We can use the following method to reload into member function of class ```ostream```.
+
+```cpp
+void ostream::operator<<(int n)
+{
+    // code for output n
+    return;
+}
+```
+
+- how can we make ```cout<<5<<"this"``` ?
+
 ```cpp
 ostream &ostream::operator<<(int n)
 {
+    // code for output n
     return *this;
 }
 
 ostream &ostream::operator<<(const char *s)
 {
+    // code for output string
     return *this;
 }
+```
 
+- Assume the output of below program is "5hello", what should we add on?
 
+```cpp
+class CStudent
+{
+    public: int nAge;
+};
+
+int main()
+{
+    CStudent s;
+    s.nAge = 5;
+    cout<<s<<""hello";
+    return 0;
+}
+
+ostream & operator<<(ostream & o, const CStudent & s)
+{
+    o<<s.nAge;
+    return 0;
+}
+```
+
+- Example: Assume c is object of class Complex, now we hope we can use ```cout<<c``` to print out as the format of ```a+bi```, use ```cin>>c``` to read ```a+bi``` as input, and make ```c.real = a``` and ```c.imag = b```.
+
+```cpp
+int main()
+{
+    Complex c;
+    int n;
+    cin>>c>>n;
+    cout<<c<<","<<n;
+    return 0;
+}
+```
+
+```cpp
+#include<iostream>
+#include<string>
+#include<cstdlib>
+using namespace std;
+class Complex
+{
+        double real, imag;
+    public:
+        Complex(double r=0, double i=0):real(r),imag(i){};
+        friend ostream & operator<<(ostream & os, const Complex &c);
+        friend istream & operator>>(istream & is, Complex &c);
+};
+
+ostream &operator<<(ostream &os, const Complex &c)
+{
+    os<<c.real<<"+"<<c.imag<<"i";
+    return os;
+}
+
+istream &operator>>(istream &is, Complex &c)
+{
+    string s;
+    is>>s;
+    int pos = s.find("+",0);
+    string sTmp = s.substr(0,pos);
+    c.real = atof(sTmp.c_str())
+    sTmp = s.substr(pos+1, s.length()-pos-2);
+    c.imag = atof(sTmp.c_str());
+    return is
+}
+```
+
+## 6. Reload operator "++" and "--"
+
+- The operator "++" and "--" can be placed in front and rear
+- The front operator can reload as
+-- Reload as member function
+
+```cpp
+T & operator++();
+T & operator--();
+```
+
+-- Reload as global function
+
+```cpp
+T & operator++(T &);
+T & operator--(T &);
+```
+
+- The rear operator can reload as
+-- Reload as member function
+
+```cpp
+T operator++(int);
+T operator--(int);
+```
+
+-- Reload as global function
+
+```cpp
+T operator++(T &, int);
+T operator--(T &, int);
+```
+
+- Example
+
+```cpp
+int main()
+{
+    CDemo d(5);
+    cout<<(d++)<<",";
+    cout<<d<<",";
+    cout<<(++d)<<",";
+    cout<<d<<endl;
+    cout<<(d--)<<",";
+    cout<<d<<",";
+    cout<<(--d)<<",";
+    cout<<d<<endl;
+    return 0;
+}
+
+class CDemo
+{
+    private:
+        int n;
+    public:
+        CDemo(int i=0):n(i){}
+        CDemo & operator++();
+        CDemo oeprator++(int);
+        operator int(){return n;}
+        friend CDemo & operator--(CDemo &);
+        friend CDemo operator--(CDemo &, int);
+};
+
+CDemo & CDemo::operator++()
+{
+    n++;
+    return * this;
+}
+
+CDemo CDemo::operator++(int k)
+{
+    CDemo tmp(*this);
+    n++;
+    return tmp;
+}
+
+CDemo & operator--(CDemo & d)
+{
+    d.n--;
+    return d;
+}
+
+CDemo operator--(CDemo & d, int)
+{
+    CDemo tmp(d);
+    d.n--;
+    return tmp;
+}
 ```
